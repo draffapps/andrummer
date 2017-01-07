@@ -1,0 +1,9 @@
+# android
+platforms
+
+# VS code/IDE
+.history
+.idea
+.vscode
+node_modules
+plugins
