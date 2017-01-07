@@ -15,17 +15,10 @@ function alertMe(message) {
    var domParser = new DOMParser();
    var xsltProcessor = new XSLTProcessor();
    xsltProcessor.importStylesheet(xsl);
-   
-   var isAndroid = false;
-
-//    var fileChooser;
 
     /* --------------------------------- Event Registration -------------------------------- */
 
     document.addEventListener('deviceready', function () {
-        if (window.plugins && window.plugins.mfilechooser) {
-            fileChooser = window.plugins.mfilechooser;
-        }
         if (navigator.notification && !window.alert) { // Override default HTML alert with native dialog
             window.alert = function (message) {
                 
@@ -68,10 +61,11 @@ function alertMe(message) {
         xhttp = new XMLHttpRequest();
         
         xhttp.open("GET", filename, false);
+        xhttp.overrideMimeType('text/xml');
         try {xhttp.responseType = "msxml-document"} catch(err) {} // Helping IE11
         // xhttp.responseType="document";
         xhttp.send(null);
-        return new DOMParser().parseFromString(xhttp.response, "application/xml");
+        return new DOMParser().parseFromString(xhttp.response, "text/xml");
         // return xhttp.responseXML;
     }
 
@@ -82,7 +76,7 @@ function alertMe(message) {
     function displayResult(file){
         readFromFile(file, function(result){
             var xml = (new DOMParser()).parseFromString(result, "text/xml");;//parseXml(result);
-            var nonParsedXml = clone(xml);
+            // var nonParsedXml = clone(xml);
             if (document.implementation && document.implementation.createDocument && xsltProcessor)
             {
                 try {
@@ -109,7 +103,7 @@ function alertMe(message) {
                         });
                     });
                 } else {
-                    alertMe("XML: " + nonParsedXml);
+                    alertMe("XML: " + xml);
                 }
             }
         },function(e){alertMe("error2: " +e);});

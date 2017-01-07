@@ -1,4 +1,4 @@
-function rollInitative(text){
+rollInitative = function (text){
     var parts = text.split(" "), diceToRoll, bonus;
 
     diceToRoll = parseInt(parts[parts.length-1].split("d")[0],10);

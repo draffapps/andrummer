@@ -3,9 +3,424 @@
 <!-- Created by Keith Rudolph, krudolph@gmail.com -->
 <!-- Version -496 -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:msxsl="http://exslt.org/common">
-	<xsl:include href="assets/pics/ConditionMonitor.xslt"/>
-	<xsl:include href="assets/pics/xt.TitleName.xslt"/>
-	<xsl:include href="assets/pics/Skills.xslt"/>
+
+	<!-- Start of imported things -->
+	<xsl:template name="ConditionMonitor">
+	<xsl:param name="PenaltyBox">3</xsl:param>
+	<xsl:param name="Offset">0</xsl:param>
+	<xsl:param name="CMWidth">3</xsl:param>
+	<xsl:param name="TotalBoxes">10</xsl:param>
+	<xsl:param name="OverFlow">0</xsl:param>
+	<xsl:param name="DamageTaken">0</xsl:param>
+		<table cellspacing="0" cellpadding="0" border="0">
+		<tr>
+			<td>
+			<table cellspacing="0" cellpadding="0" border="0">
+			<xsl:call-template name="ConditionRow">
+				<xsl:with-param name="PenaltyBox"><xsl:value-of select="$PenaltyBox" /></xsl:with-param>
+				<xsl:with-param name="Offset"><xsl:value-of select="$Offset" /></xsl:with-param>
+				<xsl:with-param name="CMWidth"><xsl:value-of select="$CMWidth" /></xsl:with-param>
+				<xsl:with-param name="TotalBoxes"><xsl:value-of select="$TotalBoxes" /></xsl:with-param>
+				<xsl:with-param name="DamageTaken"><xsl:value-of select="$DamageTaken" /></xsl:with-param>
+				<xsl:with-param name="OverFlow"><xsl:value-of select="$OverFlow" /></xsl:with-param>
+				<xsl:with-param name="LowBox">1</xsl:with-param>
+				<xsl:with-param name="HighBox"><xsl:value-of select="$CMWidth" /></xsl:with-param>
+			</xsl:call-template>
+			</table>
+			</td>
+		</tr>
+		</table>
+	</xsl:template>
+
+	<!--
+	**** ConditionRow(PenaltyBox,CMWidth,TotalBoxes,OverFlow,DamageTaken,LowBox,HighBox)
+		Params:
+		*PenaltyBox: This is the number of hit boxes for each penalty.  3 by deafault.
+		*Offset: The number of boxes that appear before the first Condition Monitor penalty.
+		*CMWidth: The number of boxes wide to draw the Condition Monitor  You could set this to the same value
+					of PenaltyBox to make the box dynamically wide to match the penalties.  Default is 3.
+		*TotalBoxes: This is the number of boxes to draw with no OverFlow
+		*OverFlow: This will draw additional boxes past the TotalBoxes Marked OVR,OVR...OVR,DEAD
+		*DamageTaken: This will mark first boxes as "greyed" to indicate previous damage already taken.
+		*LowBox: This is the number of the first box in this Row
+		*HighBox: this is the last box in this Row
+		
+		This will draw the number of boxes from LowBox to HighBox by calling "ConditionBox", which will recursively
+		call itself, then ConditionRow Compares it's HighBox to TotalBoxes+OverFlow to determine if more Rows are
+		needed.  If more are needed, it calls itself incrementing LowBox and HighBox by CMWidth.
+	-->
+	<xsl:template name="ConditionRow">
+	<xsl:param name="PenaltyBox">3</xsl:param>
+	<xsl:param name="Offset">0</xsl:param>
+	<xsl:param name="CMWidth">3</xsl:param>
+	<xsl:param name="TotalBoxes">10</xsl:param>
+	<xsl:param name="DamageTaken">0</xsl:param>
+	<xsl:param name="OverFlow">0</xsl:param>
+	<xsl:param name="LowBox">1</xsl:param>
+	<xsl:param name="HighBox">3</xsl:param>
+	<tr>
+		<xsl:call-template name="ConditionBox">
+		<xsl:with-param name="PenaltyBox"><xsl:value-of select="$PenaltyBox" /></xsl:with-param>
+		<xsl:with-param name="Offset"><xsl:value-of select="$Offset" /></xsl:with-param>
+		<xsl:with-param name="CMWidth"><xsl:value-of select="$CMWidth" /></xsl:with-param>
+		<xsl:with-param name="TotalBoxes"><xsl:value-of select="$TotalBoxes" /></xsl:with-param>
+		<xsl:with-param name="DamageTaken"><xsl:value-of select="$DamageTaken" /></xsl:with-param>
+		<xsl:with-param name="OverFlow"><xsl:value-of select="$OverFlow" /></xsl:with-param>
+		<xsl:with-param name="LowBox"><xsl:value-of select="$LowBox" /></xsl:with-param>
+		<xsl:with-param name="HighBox"><xsl:value-of select="$HighBox" /></xsl:with-param>
+		</xsl:call-template>
+	</tr>
+	<xsl:if test="$HighBox &lt; ($TotalBoxes + $OverFlow)">
+		<xsl:call-template name="ConditionRow">
+		<xsl:with-param name="PenaltyBox"><xsl:value-of select="$PenaltyBox" /></xsl:with-param>
+		<xsl:with-param name="Offset"><xsl:value-of select="$Offset" /></xsl:with-param>
+		<xsl:with-param name="CMWidth"><xsl:value-of select="$CMWidth" /></xsl:with-param>
+		<xsl:with-param name="TotalBoxes"><xsl:value-of select="$TotalBoxes" /></xsl:with-param>
+		<xsl:with-param name="DamageTaken"><xsl:value-of select="$DamageTaken" /></xsl:with-param>
+		<xsl:with-param name="OverFlow"><xsl:value-of select="$OverFlow" /></xsl:with-param>
+		<xsl:with-param name="LowBox"><xsl:value-of select="$LowBox + $CMWidth" /></xsl:with-param>
+		<xsl:with-param name="HighBox"><xsl:value-of select="$HighBox + $CMWidth" /></xsl:with-param>
+		</xsl:call-template>
+	</xsl:if>
+	</xsl:template>
+		
+	<!--
+	**** ConditionRow(PenaltyBox,CMWidth,TotalBoxes,OverFlow,DamageTaken,LowBox,HighBox)
+		Params:
+		*PenaltyBox: This is the number of hit boxes for each penalty.  3 by deafault.
+		*Offset: The number of boxes that appear before the first Condition Monitor penalty.
+		*CMWidth: The number of boxes wide to draw the Condition Monitor  You could set this to the same value
+					of PenaltyBox to make the box dynamically wide to match the penalties.  Default is 3.
+		*TotalBoxes: This is the number of boxes to draw with no OverFlow
+		*OverFlow: This will draw additional boxes past the TotalBoxes Marked OVR,OVR...OVR,DEAD
+		*DamageTaken: This will mark first boxes as "greyed" to indicate previous damage already taken.
+		*LowBox: This is the number of the first box in this Row
+		*HighBox: this is the last box in this Row
+		
+		This template draws a box, which can be colored based on it having Damage Taken, and also, it determines
+		if this box needs text in it, such as markings for OverFlow, or Penalties.  Then it determins if more 
+		boxes are needed for this Row(Is LowBox less than HighBox), if more are needed, it recursively calls
+		itself incrementing LowBox and HighBox by CMWidth.
+	-->
+	<xsl:template name="ConditionBox">
+	<xsl:param name="PenaltyBox">3</xsl:param>
+	<xsl:param name="Offset">0</xsl:param>
+	<xsl:param name="CMWidth">3</xsl:param>
+	<xsl:param name="TotalBoxes">10</xsl:param>
+	<xsl:param name="DamageTaken">0</xsl:param>
+	<xsl:param name="OverFlow">0</xsl:param>
+	<xsl:param name="LowBox">1</xsl:param>
+	<xsl:param name="HighBox">3</xsl:param>
+	<td>
+		<xsl:attribute name="class">
+		<xsl:choose> <!-- Choose Background Color for this Box. -->
+			<xsl:when test="$LowBox &lt;= $DamageTaken">conditionmonitorboxfilled</xsl:when>
+			<xsl:when test="$LowBox &gt; ($TotalBoxes + $OverFlow)">conditionmonitorboxnotused</xsl:when>
+			<xsl:otherwise>conditionmonitorbox</xsl:otherwise>
+		</xsl:choose>
+		</xsl:attribute>
+		<xsl:if test="$LowBox &lt;= ($TotalBoxes + $OverFlow)">
+		&#160;
+		<xsl:choose> <!-- Determine any text needed in this Box. -->
+			<!-- Last Box of OverFlow needs DEAD -->
+			<xsl:when test="$LowBox = ($TotalBoxes + $OverFlow) and $OverFlow &gt; 0">
+			DEAD
+			</xsl:when>
+			<!-- Boxes of OverFlow are Marked OVR -->
+			<xsl:when test="$LowBox &gt; $TotalBoxes">
+			OVR
+			</xsl:when>
+			<!-- Last Normal Box -->
+			<xsl:when test="$LowBox = $TotalBoxes">
+			Down
+			</xsl:when>
+			<!-- Boxes that incurr a penalty are Marked -->
+			<xsl:when test="($LowBox - $Offset) mod $PenaltyBox = 0 and $LowBox &gt; $Offset">
+			<xsl:value-of select="(($LowBox - $Offset) div $PenaltyBox) * -1" />
+			</xsl:when>
+		</xsl:choose>
+		</xsl:if>
+	</td>
+	<xsl:if test="$LowBox &lt; $HighBox">
+		<xsl:call-template name="ConditionBox">
+		<xsl:with-param name="PenaltyBox"><xsl:value-of select="$PenaltyBox" /></xsl:with-param>
+		<xsl:with-param name="Offset"><xsl:value-of select="$Offset" /></xsl:with-param>
+		<xsl:with-param name="CMWidth"><xsl:value-of select="$CMWidth" /></xsl:with-param>
+		<xsl:with-param name="TotalBoxes"><xsl:value-of select="$TotalBoxes" /></xsl:with-param>
+		<xsl:with-param name="DamageTaken"><xsl:value-of select="$DamageTaken" /></xsl:with-param>
+		<xsl:with-param name="OverFlow"><xsl:value-of select="$OverFlow" /></xsl:with-param>
+		<xsl:with-param name="LowBox"><xsl:value-of select="$LowBox + 1" /></xsl:with-param>
+		<xsl:with-param name="HighBox"><xsl:value-of select="$HighBox" /></xsl:with-param>
+		</xsl:call-template>
+	</xsl:if>
+	</xsl:template>
+
+	<xsl:variable name="DefaultName" select="'Unnamed Character'"/>
+
+	<xsl:template name="TitleName">
+			<xsl:param name="name" select="''"/>
+			<xsl:param name="alias" select="''"/>
+			<xsl:param name="PreferName" select="'N'"/>
+			<xsl:param name="Default" select="$DefaultName"/>
+		<xsl:choose>
+			<xsl:when test="$PreferName != 'Y'"> 
+				<!-- use alias, if present, in preference to character name -->
+				<xsl:choose>
+					<xsl:when test="$alias != ''">
+						<xsl:value-of select="$alias"/>
+					</xsl:when>
+					<xsl:when test="$name != ''">
+						<xsl:value-of select="$name"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="$Default"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:when>
+			<xsl:when test="$alias != ''">
+				<!-- use character name, if present, instead of alias -->
+				<xsl:choose>
+					<xsl:when test="$name = '' or $name = $Default">
+						<xsl:value-of select="$alias"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="$name"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:when>
+			<xsl:otherwise>
+				<!-- use character name, unless blank when default is used -->
+				<xsl:choose>
+					<xsl:when test="$name != ''">
+						<xsl:value-of select="$name"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="$Default"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template name="skills1">
+        <xsl:variable name="skillcut" select="round(count(skills/skill[knowledge = 'False' and (rating &gt; 0 or total &gt; 0)]) div 2)"/>
+        <xsl:variable name="sortedskills">
+        <xsl:for-each select="skills/skill[knowledge = 'False' and (rating &gt; 0 or total &gt; 0)]">
+            <xsl:sort select="skillcategory" />
+            <xsl:sort select="name" order="ascending" />
+            <xsl:if test="position() &lt;= $skillcut">
+                <xsl:copy-of select="current()"/>
+            </xsl:if>
+        </xsl:for-each>
+        </xsl:variable>
+		<xsl:for-each select="msxsl:node-set($sortedskills)/skill">
+                <xsl:choose>
+                    <xsl:when test="position() = 1">
+                        <tr><td colspan="6" style="border-bottom:solid black 1px;"><strong><xsl:value-of select="skillcategory" /> Skills</strong></td></tr>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:choose>
+                            <xsl:when test="skillcategory != preceding-sibling::skill[1]/skillcategory">
+                                <tr><td colspan="6" style="border-bottom:solid black 1px;"><strong><xsl:value-of select="skillcategory" /> Skills</strong></td></tr>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:otherwise>
+                </xsl:choose>
+
+                <tr>
+                    <xsl:if test="position() mod 2 != 1">
+                        <xsl:attribute name="bgcolor">#e4e4e4</xsl:attribute>
+                    </xsl:if>
+                    <td width="45%" valign="top">
+                        <xsl:value-of select="name" />
+                        <xsl:if test="spec != ''"> (<xsl:value-of select="spec" />)</xsl:if>
+                    </td>
+                    <td width="15%" style="text-align:center;" valign="top" roller="true">
+                        <xsl:value-of select="total" />
+                        <xsl:if test="spec != '' and exotic = 'False'"> (<xsl:value-of select="specializedrating" />)</xsl:if>
+                    </td>
+                    <td width="10%" style="text-align:center;" valign="top">
+                        <xsl:value-of select="rating" />
+                    </td>
+                    <td width="20%" style="text-align:center;" valign="top">
+                        <xsl:value-of select="attributemod" /> (<xsl:value-of select="displayattribute" />)
+                    </td>
+                    <td width="10%" style="text-align:center;" valign="top">
+                        <xsl:value-of select="ratingmod" />
+                    </td>
+                </tr>
+		</xsl:for-each>
+	</xsl:template>
+	
+	<xsl:template name="skills2">
+        <xsl:variable name="skillcut" select="round(count(skills/skill[knowledge = 'False' and (rating &gt; 0 or total &gt; 0)]) div 2)"/>
+        <xsl:variable name="sortedskills">
+        <xsl:for-each select="skills/skill[knowledge = 'False' and (rating &gt; 0 or total &gt; 0)]">
+            <xsl:sort select="skillcategory" />
+            <xsl:sort select="name" order="ascending" />
+            <xsl:if test="position() &gt; $skillcut">
+                <xsl:copy-of select="current()"/>
+            </xsl:if>
+        </xsl:for-each>
+        </xsl:variable>
+		<xsl:for-each select="msxsl:node-set($sortedskills)/skill">
+            <xsl:choose>
+                <xsl:when test="position() = 1">
+                    <tr><td colspan="6" style="border-bottom:solid black 1px;"><strong><xsl:value-of select="skillcategory" /> Skills</strong></td></tr>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <xsl:when test="skillcategory != preceding-sibling::skill[1]/skillcategory">
+                            <tr><td colspan="6" style="border-bottom:solid black 1px;"><strong><xsl:value-of select="skillcategory" /> Skills</strong></td></tr>
+                        </xsl:when>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose>
+            <tr>
+                <xsl:if test="position() mod 2 != 1">
+                    <xsl:attribute name="bgcolor">#e4e4e4</xsl:attribute>
+                </xsl:if>
+                <td width="45%" valign="top">
+                    <xsl:value-of select="name" />
+                    <xsl:if test="spec != ''"> (<xsl:value-of select="spec" />)</xsl:if>
+                </td>
+                <td width="15%" style="text-align:center;" valign="top" roller="true">
+                    <xsl:value-of select="total" />
+                    <xsl:if test="spec != '' and exotic = 'False'"> (<xsl:value-of select="specializedrating" />)</xsl:if>
+                </td>
+                <td width="10%" style="text-align:center;" valign="top">
+                    <xsl:value-of select="rating" />
+                </td>
+                <td width="20%" style="text-align:center;" valign="top">
+                    <xsl:value-of select="attributemod" /> (<xsl:value-of select="displayattribute" />)
+                </td>
+                <td width="10%" style="text-align:center;" valign="top">
+                    <xsl:value-of select="ratingmod" />
+                </td>
+            </tr>
+		</xsl:for-each>
+	</xsl:template>
+
+	<xsl:template name="skills3">
+		<xsl:for-each select="skills/skill[knowledge = 'True' and islanguage = 'True']">
+			<xsl:sort select="name" />
+            <tr>
+                <xsl:if test="position() mod 2 != 1">
+                    <xsl:attribute name="bgcolor">#e4e4e4</xsl:attribute>
+                </xsl:if>
+                <td width="45%" valign="top">
+                    <xsl:if test="islanguage = 'True'">Language: </xsl:if>
+                    <xsl:value-of select="name" />
+                    <xsl:if test="spec != ''"> (<xsl:value-of select="spec" />)</xsl:if>
+                </td>
+                <td width="15%" style="text-align:center;" valign="top" roller="true">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="total" />
+                            <xsl:if test="spec != ''"> (<xsl:value-of select="specializedrating" />)</xsl:if>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+                <td width="10%" style="text-align:center;" valign="top">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="rating" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+                <td width="20%" style="text-align:center;" valign="top">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="attributemod" /> (<xsl:value-of select="displayattribute" />)
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+                <td width="10%" style="text-align:center;" valign="top">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="ratingmod" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+            </tr>
+		</xsl:for-each>
+		<xsl:for-each select="skills/skill[knowledge = 'True' and islanguage != 'True']">
+			<xsl:sort select="name" />
+            <tr>
+                <xsl:if test="position() mod 2 != 1">
+                    <xsl:attribute name="bgcolor">#e4e4e4</xsl:attribute>
+                </xsl:if>
+                <td width="45%" valign="top">
+                    <xsl:if test="islanguage = 'True'">Language: </xsl:if>
+                    <xsl:value-of select="name" />
+                    <xsl:if test="spec != ''"> (<xsl:value-of select="spec" />)</xsl:if>
+                </td>
+                <td width="15%" style="text-align:center;" valign="top" roller="true">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="total" />
+                            <xsl:if test="spec != ''"> (<xsl:value-of select="specializedrating" />)</xsl:if>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+                <td width="10%" style="text-align:center;" valign="top">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="rating" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+                <td width="20%" style="text-align:center;" valign="top">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="attributemod" /> (<xsl:value-of select="displayattribute" />)
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+                <td width="10%" style="text-align:center;" valign="top">
+                    <xsl:choose>
+                        <xsl:when test="islanguage = 'True' and rating = 0">
+                            N
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="ratingmod" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </td>
+            </tr>
+        </xsl:for-each>
+        <xsl:if test="mugshot != ''">
+            <tr>
+                <td colspan="5" style="text-align:center;">
+                    <br />
+                    <img src="data:image/png;base64,{mugshotbase64}" />
+                </td>
+            </tr>
+		</xsl:if>
+	</xsl:template>
+
+	<!-- End of imported things -->
 
 	<xsl:template match="/characters/character">
 		<xsl:variable name="TitleName">
