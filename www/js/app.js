@@ -1,8 +1,8 @@
-function alertMe(message) {
+function alertMe(message, header) {
     navigator.notification.alert(
         message,    // message
         null,       // callback
-        "odd", // title
+        header || "odd", // title
         'OK'        // buttonName
     );
 }
@@ -93,7 +93,7 @@ function alertMe(message) {
 
                     $("[roller|='true']").each(function() {
                         $( this ).click(function() {
-                            rollTest($( this ).text());
+                            rollTest($( this ).text(), this.previousElementSibling.innerHTML);
                         });
                     });
 

@@ -1,4 +1,4 @@
-rollInitative = function (text){
+function rollInitative(text){
     var parts = text.split(" "), diceToRoll, bonus;
 
     diceToRoll = parseInt(parts[parts.length-1].split("d")[0],10);
@@ -16,13 +16,13 @@ rollInitative = function (text){
     this.alertMe(bonus);
 }
 
-function rollTest(diceToRoll) {    
+function rollTest(diceToRoll, checkName) {    
     var parts = diceToRoll.split(" "), baseDice, specialized, ones = 0, hits = 0, output;
 
     baseDice = parseInt(parts[0],10);
 
     for ( var dieWalker = 0 ; dieWalker < baseDice ; dieWalker++ ) {
-        let die = this.rollDie();
+        var die = this.rollDie();
 
         if ( die === 1 ) {
             ones++;
@@ -34,9 +34,9 @@ function rollTest(diceToRoll) {
     output = hits + (Math.ceil(baseDice/2) <= ones ? (hits === 0 ? " CRITICAL GLITCH" : " GLITCH") : "");
     if ( parts.length > 1 ) {
 
-        let specialized = parseInt(parts[1].substring(1, parts[1].length - 1)) - baseDice;
+        var specialized = parseInt(parts[1].substring(1, parts[1].length - 1)) - baseDice;
         for ( var dieWalker = 0 ; dieWalker < specialized ; dieWalker++ ) {
-            let die = this.rollDie();
+            var die = this.rollDie();
 
             if ( die === 1 ) {
                 ones++;
@@ -48,7 +48,7 @@ function rollTest(diceToRoll) {
     }
 
 
-    this.alertMe(output);
+    this.alertMe(output, checkName);
 }
 
 function rollDie(){
