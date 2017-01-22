@@ -228,9 +228,14 @@
                 </xsl:choose>
 
                 <tr>
-                    <xsl:if test="position() mod 2 != 1">
-                        <xsl:attribute name="bgcolor">#e4e4e4</xsl:attribute>
-                    </xsl:if>
+                    <xsl:choose>
+                  	  <xsl:when test="position() mod 2 != 1">
+                    	<xsl:attribute name="class">even</xsl:attribute>
+                      </xsl:when>
+					  <xsl:otherwise>
+					  	<xsl:attribute name="class">odd</xsl:attribute>
+					  </xsl:otherwise>
+					</xsl:choose>
                     <td width="45%" valign="top">
                         <xsl:value-of select="name" />
                         <xsl:if test="spec != ''"> (<xsl:value-of select="spec" />)</xsl:if>

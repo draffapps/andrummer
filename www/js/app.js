@@ -29,19 +29,34 @@ function alertMe(message, header) {
             displayResult($("#fileInput")[0].files[0]);
         });
 
+        $("#rollButton").click(function(){
+            navigator.notification.prompt(
+                'Number of dice?',  // message
+                function(results) {
+                    rollTest(results.input1, 'Manual');
+                },                  // callback to invoke
+                'odd',            // title
+                ['Ok'],             // buttonLabels
+                '12'                 // defaultText
+            );
+        });
+
+        $("#toggleButton").click(function(eventbutton){
+            showCharacterSheet(event.target.value === "Character Sheet");
+        });
+
         $("#loader").click(function (e){
-            // alert(device.platform);
-            // if (device.platform === "Android"){
-            //     fileChooser.open(['.xml', '.chum5'], function (uri) {
-            //         window.resolveLocalFileSystemURL("file://" + uri, function (fileEntry) {
-            //             fileEntry.file(displayResult);
-            //         });
-            //     }, function(err){
-            //         alert(err);
-            //     });
-            // } else {
+            if (device.platform === "Android" && parseInt(device.version.charAt(0)) < 5){
+                fileChooser.open(function (uri) {
+                    window.resolveLocalFileSystemURL(uri, function (fileEntry) {
+                        fileEntry.file(displayResult);
+                    });
+                }, function(err){
+                    alert(err);
+                });
+            } else {
                 $("#fileInput").click();
-            // }
+            }
         });        
     }, false);
 
@@ -75,6 +90,12 @@ function alertMe(message, header) {
 
     function displayResult(file){
         readFromFile(file, function(result){
+            while (result.charAt(0) !== '<') {
+                result = result.substring(1);
+            }
+            while (result.charAt(result.length-1) !== '>') {
+                result = result.substring(0, result.length -1);
+            }
             var xml = (new DOMParser()).parseFromString(result, "text/xml");;//parseXml(result);
             // var nonParsedXml = clone(xml);
             if (document.implementation && document.implementation.createDocument && xsltProcessor)
@@ -86,14 +107,22 @@ function alertMe(message, header) {
                 }
 
                 if ( resultDocument ) {
-                    document.getElementById("testBody").innerHTML = "";
-                    document.getElementById("testBody").appendChild(resultDocument);
+                    showCharacterSheet(true);
+
+                    $("#characterSheet").innerHTML = "";
+                    $("#characterSheet").append(resultDocument);
                     $(".fill100.noprint").hide();
                     $(".rowsummarybutton").hide();
 
                     $("[roller|='true']").each(function() {
+                        var rollData = $(this).text();
+                        var rollType = this.previousElementSibling.innerHTML;
                         $( this ).click(function() {
-                            rollTest($( this ).text(), this.previousElementSibling.innerHTML);
+                            rollTest(rollData, rollType);
+                        });
+
+                        $( this.previousElementSibling ).click(function() {
+                            rollTest(rollData, rollType);
                         });
                     });
 
@@ -107,5 +136,17 @@ function alertMe(message, header) {
                 }
             }
         },function(e){alertMe("error2: " +e);});
+    }
+
+    function showCharacterSheet(showSheet) {
+        if(showSheet) {
+            $("#rollHistory").hide();
+            $("#characterSheet").show();
+            $("#toggleButton").val("Roll History");
+        } else {
+            $("#rollHistory").show();
+            $("#characterSheet").hide();
+            $("#toggleButton").val("Character Sheet");
+        }
     }
 }());

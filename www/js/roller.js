@@ -1,5 +1,5 @@
 function rollInitative(text){
-    var parts = text.split(" "), diceToRoll, bonus;
+    var parts = text.trim().split(" "), diceToRoll, bonus;
 
     diceToRoll = parseInt(parts[parts.length-1].split("d")[0],10);
 
@@ -13,11 +13,13 @@ function rollInitative(text){
         bonus += this.rollDie();
     }
 
-    this.alertMe(bonus);
+    this.alertMe(bonus, (parseInt(parts[0].charAt(0)) !== NaN ? parts[0] : null) );
+
+    $("#rollHistory").append("<br>" + (parseInt(parts[0].charAt(0)) !== NaN ? parts[0] : "Initative, type unfound") + ": " + bonus);
 }
 
 function rollTest(diceToRoll, checkName) {    
-    var parts = diceToRoll.split(" "), baseDice, specialized, ones = 0, hits = 0, output;
+    var parts = diceToRoll.split(" "), baseDice, specialized, ones = 0, hits = 0, output, rolls = [];
 
     baseDice = parseInt(parts[0],10);
 
@@ -28,7 +30,21 @@ function rollTest(diceToRoll, checkName) {
             ones++;
         } else if ( die >= 5 ) {
             hits++;
+
+            if ($("#preEdge").is(':checked')) {
+                while ( die === 6 ) {
+                    rolls.push(die);
+
+                    die = this.rollDie();
+
+                    if ( die >= 5 ) {
+                        hits++;
+                    } 
+                }
+            }
         }
+        
+        rolls.push(die);
     }
 
     output = hits + (Math.ceil(baseDice/2) <= ones ? (hits === 0 ? " CRITICAL GLITCH" : " GLITCH") : "");
@@ -43,9 +59,30 @@ function rollTest(diceToRoll, checkName) {
             } else if ( die >= 5 ) {
                 hits++;
             }
+
+            if ($("#preEdge").is(':checked')) {
+                while ( die === 6 ) {
+                    rolls.push(die);
+
+                    die = this.rollDie();
+
+                    if ( die >= 5 ) {
+                        hits++;
+                    } 
+                }
+            }
+
+            rolls.push(die);
         }
         output += "(" + hits + (Math.ceil((baseDice + specialized)/2) <= ones ? (hits === 0 ? " CRITICAL GLITCH" : " GLITCH") : "") + ")";
+
     }
+
+    rolls.sort(function (a,b) {
+        return b-a;
+    });
+
+    $("#rollHistory").append("<br>" + checkName + ": " + output + " " + rolls);
 
 
     this.alertMe(output, checkName);

@@ -1,0 +1,18 @@
+
+.even {
+    /*background: linear-gradient(#e4e4e4,#f5f5f5,#e4e4e4);*/
+    background: #e4e4e4;
+}
+
+.even:active {
+    background: linear-gradient(#f5f5f5, #e4e4e4, #f5f5f5);
+}
+
+.odd {
+    /*background: linear-gradient(#fff, #eee, #fff);*/
+    background:white;
+}
+
+.odd:active {
+    background: linear-gradient(#eee, #fff, #eee);
+}
